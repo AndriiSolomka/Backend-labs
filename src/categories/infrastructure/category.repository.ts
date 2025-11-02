@@ -1,24 +1,45 @@
 import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
 import { Category } from '../domain/entities/category.entity';
+import {
+  CreateCategoryDto,
+  UpdateCategoryDto,
+} from '../presentation/category.dto';
 
 @Injectable()
 export class CategoryRepository {
-  private categories: Map<string, Category> = new Map();
+  constructor(private prisma: PrismaService) {}
 
-  create(category: Category): Category {
-    this.categories.set(category.id, category);
-    return category;
+  async create(data: CreateCategoryDto): Promise<Category> {
+    return this.prisma.category.create({
+      data,
+    });
   }
 
-  findById(id: string): Category | null {
-    return this.categories.get(id) || null;
+  async findById(id: string): Promise<Category | null> {
+    return this.prisma.category.findUnique({
+      where: { id },
+    });
   }
 
-  findAll(): Category[] {
-    return Array.from(this.categories.values());
+  async findAll(): Promise<Category[]> {
+    return this.prisma.category.findMany({
+      orderBy: {
+        name: 'asc',
+      },
+    });
   }
 
-  delete(id: string): boolean {
-    return this.categories.delete(id);
+  async update(id: string, data: UpdateCategoryDto): Promise<Category> {
+    return this.prisma.category.update({
+      where: { id },
+      data,
+    });
+  }
+
+  async delete(id: string): Promise<Category> {
+    return this.prisma.category.delete({
+      where: { id },
+    });
   }
 }
