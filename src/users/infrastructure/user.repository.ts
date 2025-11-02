@@ -1,24 +1,51 @@
 import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
 import { User } from '../domain/entities/user.entity';
+import { CreateUserDto, UpdateUserDto } from '../presentation/user.dto';
 
 @Injectable()
 export class UserRepository {
-  private users: Map<string, User> = new Map();
+  constructor(private prisma: PrismaService) {}
 
-  create(user: User): User {
-    this.users.set(user.id, user);
-    return user;
+  async create(data: CreateUserDto): Promise<User> {
+    return this.prisma.user.create({
+      data,
+      include: {
+        defaultCurrency: true,
+      },
+    });
   }
 
-  findById(id: string): User | null {
-    return this.users.get(id) || null;
+  async findById(id: string): Promise<User | null> {
+    return this.prisma.user.findUnique({
+      where: { id },
+      include: {
+        defaultCurrency: true,
+      },
+    });
   }
 
-  findAll(): User[] {
-    return Array.from(this.users.values());
+  async findAll(): Promise<User[]> {
+    return this.prisma.user.findMany({
+      include: {
+        defaultCurrency: true,
+      },
+    });
   }
 
-  delete(id: string): boolean {
-    return this.users.delete(id);
+  async update(id: string, data: UpdateUserDto): Promise<User> {
+    return this.prisma.user.update({
+      where: { id },
+      data,
+      include: {
+        defaultCurrency: true,
+      },
+    });
+  }
+
+  async delete(id: string): Promise<User> {
+    return this.prisma.user.delete({
+      where: { id },
+    });
   }
 }
