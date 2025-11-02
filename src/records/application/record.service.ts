@@ -21,19 +21,15 @@ export class RecordService {
   ) {}
 
   async createRecord(dto: CreateRecordDto): Promise<Record> {
-    // Перевіряємо чи існує користувач
     const user = await this.userService.getUserById(dto.userId);
 
-    // Перевіряємо чи існує категорія
     await this.categoryService.getCategoryById(dto.categoryId);
 
-    // Якщо валюта не вказана, використовуємо валюту користувача за замовчуванням
     let currencyId = dto.currencyId;
     if (!currencyId && user.defaultCurrencyId) {
       currencyId = user.defaultCurrencyId;
     }
 
-    // Якщо валюта вказана, перевіряємо чи вона існує
     if (currencyId) {
       await this.currencyService.findById(currencyId);
     }
@@ -65,12 +61,10 @@ export class RecordService {
   async updateRecord(id: string, dto: UpdateRecordDto): Promise<Record> {
     await this.getRecordById(id);
 
-    // Перевіряємо чи існує категорія, якщо вона вказана
     if (dto.categoryId) {
       await this.categoryService.getCategoryById(dto.categoryId);
     }
 
-    // Перевіряємо чи існує валюта, якщо вона вказана
     if (dto.currencyId) {
       await this.currencyService.findById(dto.currencyId);
     }
