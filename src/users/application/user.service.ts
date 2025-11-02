@@ -1,22 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { randomUUID } from 'crypto';
 import { User } from '../domain/entities/user.entity';
 import { UserRepository } from '../infrastructure/user.repository';
+import { CreateUserDto, UpdateUserDto } from '../presentation/user.dto';
 
 @Injectable()
 export class UserService {
   constructor(private readonly userRepository: UserRepository) {}
 
-  createUser(name: string): User {
-    const user: User = {
-      id: randomUUID(),
-      name,
-    };
-    return this.userRepository.create(user);
+  async createUser(dto: CreateUserDto): Promise<User> {
+    return this.userRepository.create(dto);
   }
 
-  getUserById(id: string): User {
-    const user = this.userRepository.findById(id);
+  async getUserById(id: string): Promise<User> {
+    const user = await this.userRepository.findById(id);
 
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
@@ -25,12 +21,17 @@ export class UserService {
     return user;
   }
 
-  getAllUsers(): User[] {
+  async getAllUsers(): Promise<User[]> {
     return this.userRepository.findAll();
   }
 
-  deleteUser(id: string): void {
-    const user = this.getUserById(id);
-    this.userRepository.delete(user.id);
+  async updateUser(id: string, dto: UpdateUserDto): Promise<User> {
+    await this.getUserById(id);
+    return this.userRepository.update(id, dto);
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    await this.getUserById(id);
+    await this.userRepository.delete(id);
   }
 }

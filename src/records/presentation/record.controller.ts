@@ -2,40 +2,57 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Delete,
   Param,
   Body,
   Query,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { RecordService } from '../application/record.service';
-import { CreateRecordDto, RecordResponseDto } from './record.dto';
+import {
+  CreateRecordDto,
+  UpdateRecordDto,
+  RecordResponseDto,
+} from './record.dto';
 
 @Controller('record')
 export class RecordController {
   constructor(private readonly recordService: RecordService) {}
 
   @Get(':record_id')
-  getRecordById(@Param('record_id') recordId: string): RecordResponseDto {
+  async getRecordById(
+    @Param('record_id') recordId: string,
+  ): Promise<RecordResponseDto> {
     return this.recordService.getRecordById(recordId);
   }
 
   @Get()
-  getRecords(
+  async getRecords(
     @Query('user_id') userId?: string,
     @Query('category_id') categoryId?: string,
-  ): RecordResponseDto[] {
+  ): Promise<RecordResponseDto[]> {
     return this.recordService.getRecords(userId, categoryId);
   }
 
   @Post()
-  createRecord(
-    @Body() { userId, categoryId, amount }: CreateRecordDto,
-  ): RecordResponseDto {
-    return this.recordService.createRecord(userId, categoryId, amount);
+  @HttpCode(HttpStatus.CREATED)
+  async createRecord(@Body() dto: CreateRecordDto): Promise<RecordResponseDto> {
+    return this.recordService.createRecord(dto);
+  }
+
+  @Put(':record_id')
+  async updateRecord(
+    @Param('record_id') recordId: string,
+    @Body() dto: UpdateRecordDto,
+  ): Promise<RecordResponseDto> {
+    return this.recordService.updateRecord(recordId, dto);
   }
 
   @Delete(':record_id')
-  deleteRecord(@Param('record_id') recordId: string): void {
-    return this.recordService.deleteRecord(recordId);
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteRecord(@Param('record_id') recordId: string): Promise<void> {
+    await this.recordService.deleteRecord(recordId);
   }
 }

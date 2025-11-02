@@ -1,27 +1,25 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { randomUUID } from 'crypto';
 import { Category } from '../domain/entities/category.entity';
 import { CategoryRepository } from '../infrastructure/category.repository';
+import {
+  CreateCategoryDto,
+  UpdateCategoryDto,
+} from '../presentation/category.dto';
 
 @Injectable()
 export class CategoryService {
   constructor(private readonly categoryRepository: CategoryRepository) {}
 
-  createCategory(name: string): Category {
-    const category: Category = {
-      id: randomUUID(),
-      name,
-    };
-
-    return this.categoryRepository.create(category);
+  async createCategory(dto: CreateCategoryDto): Promise<Category> {
+    return this.categoryRepository.create(dto);
   }
 
-  getAllCategories(): Category[] {
+  async getAllCategories(): Promise<Category[]> {
     return this.categoryRepository.findAll();
   }
 
-  getCategoryById(id: string): Category {
-    const category = this.categoryRepository.findById(id);
+  async getCategoryById(id: string): Promise<Category> {
+    const category = await this.categoryRepository.findById(id);
 
     if (!category) {
       throw new NotFoundException(`Category with id ${id} not found`);
@@ -30,8 +28,13 @@ export class CategoryService {
     return category;
   }
 
-  deleteCategory(id: string): void {
-    const category = this.getCategoryById(id);
-    this.categoryRepository.delete(category.id);
+  async updateCategory(id: string, dto: UpdateCategoryDto): Promise<Category> {
+    await this.getCategoryById(id);
+    return this.categoryRepository.update(id, dto);
+  }
+
+  async deleteCategory(id: string): Promise<void> {
+    await this.getCategoryById(id);
+    await this.categoryRepository.delete(id);
   }
 }
