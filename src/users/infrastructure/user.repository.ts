@@ -8,7 +8,7 @@ export class UserRepository {
   constructor(private prisma: PrismaService) {}
 
   async create(data: CreateUserDto): Promise<User> {
-    return this.prisma.user.create({
+    return await this.prisma.user.create({
       data,
       include: {
         defaultCurrency: true,
@@ -17,7 +17,7 @@ export class UserRepository {
   }
 
   async findById(id: string): Promise<User | null> {
-    return this.prisma.user.findUnique({
+    return await this.prisma.user.findUnique({
       where: { id },
       include: {
         defaultCurrency: true,
@@ -26,7 +26,7 @@ export class UserRepository {
   }
 
   async findAll(): Promise<User[]> {
-    return this.prisma.user.findMany({
+    return await this.prisma.user.findMany({
       include: {
         defaultCurrency: true,
       },
@@ -34,7 +34,7 @@ export class UserRepository {
   }
 
   async update(id: string, data: UpdateUserDto): Promise<User> {
-    return this.prisma.user.update({
+    return await this.prisma.user.update({
       where: { id },
       data,
       include: {
@@ -44,8 +44,14 @@ export class UserRepository {
   }
 
   async delete(id: string): Promise<User> {
-    return this.prisma.user.delete({
+    return await this.prisma.user.delete({
       where: { id },
+    });
+  }
+
+  async findByEmail(email: string): Promise<User | null> {
+    return await this.prisma.user.findUnique({
+      where: { email },
     });
   }
 }

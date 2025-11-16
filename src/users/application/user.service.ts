@@ -1,37 +1,41 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { User } from '../domain/entities/user.entity';
 import { UserRepository } from '../infrastructure/user.repository';
-import { CreateUserDto, UpdateUserDto } from '../presentation/user.dto';
+import { UpdateUserDto, UserResponseDto } from '../presentation/user.dto';
 
 @Injectable()
 export class UserService {
   constructor(private readonly userRepository: UserRepository) {}
 
-  async createUser(dto: CreateUserDto): Promise<User> {
-    return this.userRepository.create(dto);
-  }
-
-  async getUserById(id: string): Promise<User> {
+  async getUserById(id: string): Promise<UserResponseDto> {
     const user = await this.userRepository.findById(id);
 
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
     }
 
-    return user;
+    return this.excludePassword(user);
   }
 
-  async getAllUsers(): Promise<User[]> {
-    return this.userRepository.findAll();
+  async getAllUsers(): Promise<UserResponseDto[]> {
+    const users = await this.userRepository.findAll();
+    return users.map((user) => this.excludePassword(user));
   }
 
-  async updateUser(id: string, dto: UpdateUserDto): Promise<User> {
+  async updateUser(id: string, dto: UpdateUserDto): Promise<UserResponseDto> {
     await this.getUserById(id);
-    return this.userRepository.update(id, dto);
+    const user = await this.userRepository.update(id, dto);
+    return this.excludePassword(user);
   }
 
   async deleteUser(id: string): Promise<void> {
     await this.getUserById(id);
     await this.userRepository.delete(id);
+  }
+
+  private excludePassword(user: User): UserResponseDto {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...result } = user;
+    return result;
   }
 }
