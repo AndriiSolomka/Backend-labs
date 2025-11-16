@@ -8,11 +8,14 @@ import {
   Param,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { CurrencyService } from '../application/currency.service';
 import { CreateCurrencyDto, UpdateCurrencyDto } from './currency.dto';
+import { JwtAuthGuard } from '../../auth/infrastructure/jwt-auth.guard';
 
 @Controller('currency')
+@UseGuards(JwtAuthGuard)
 export class CurrencyController {
   constructor(private readonly service: CurrencyService) {}
 

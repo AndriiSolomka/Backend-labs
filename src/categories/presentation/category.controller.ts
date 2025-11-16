@@ -8,6 +8,7 @@ import {
   Param,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { CategoryService } from '../application/category.service';
 import {
@@ -15,8 +16,10 @@ import {
   UpdateCategoryDto,
   CategoryResponseDto,
 } from './category.dto';
+import { JwtAuthGuard } from '../../auth/infrastructure/jwt-auth.guard';
 
 @Controller('category')
+@UseGuards(JwtAuthGuard)
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
